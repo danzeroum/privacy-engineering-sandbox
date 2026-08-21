@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Privacy Engineering Sandbox — bancada educacional com cenários sintéticos para praticar processo, dados, evidências e validação humana em Engenharia de Privacidade.">
+<title>Privacy Engineering Sandbox</title>
+<style>
+  /* ===== Design tokens ===== */
+  :root{
+    --bg:#F7FAFC;
+    --surface:#FFFFFF;
+    --text:#17324D;
+    --text-sec:#49657D;
+    --action:#176BBD;
+    --action-hover:#135A9E;
+    --success:#1F7A5B;
+    --pending:#9A6700;
+    --alert:#B42318;
+    --border:#D7E2EC;
+    --shadow-sm:0 1px 2px rgba(23,50,77,.06), 0 1px 3px rgba(23,50,77,.04);
+    --shadow-md:0 4px 12px rgba(23,50,77,.08), 0 2px 4px rgba(23,50,77,.04);
+    --radius-sm:6px;
+    --radius:10px;
+    --radius-lg:14px;
+    --maxw:1180px;
+    --space:1rem;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *,*::before,*::after{
+      animation-duration:.001ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.001ms !important;
+    }
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ===== Skip link ===== */
+  .skip-link{
+    position:absolute;
+    left:-9999px;
+    top:0;
+    background:var(--action);
+    color:#fff;
+    padding:.75rem 1rem;
+    border-radius:0 0 var(--radius-sm) 0;
+    z-index:1000;
+    font-weight:600;
+  }
+  .skip-link:focus{
+    left:0;
+    top:0;
+  }
+
+  /* ===== Focus visible ===== */
+  a:focus-visible,button:focus-visible,[tabindex]:focus-visible,input:focus-visible,summary:focus-visible{
+    outline:3px solid var(--action);
+    outline-offset:2px;
+    border-radius:var(--radius-sm);
+  }
+
+  /* ===== Header / Nav ===== */
+  .site-header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(180%) blur(8px);
+    -webkit-backdrop-filter:saturate(180%) blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:.6rem 1.25rem;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+    font-weight:700;
+    color:var(--text);
+    text-decoration:none;
+    font-size:1.05rem;
+  }
+  .brand svg{flex-shrink:0;}
+  .nav-links{
+    display:flex;
+    gap:.25rem;
+    margin-left:auto;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .nav-links a{
+    color:var(--text-sec);
+    text-decoration:none;
+    padding:.55rem .7rem;
+    border-radius:var(--radius-sm);
+    font-size:.92rem;
+    min-height:44px;
+    display:inline-flex;
+    align-items:center;
+    transition:background .15s,color .15s;
+  }
+  .nav-links a:hover{background:var(--bg);color:var(--text);}
+  .nav-toggle{
+    display:none;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:.55rem .8rem;
+    cursor:pointer;
+    min-height:44px;
+    color:var(--text);
+    font-weight:600;
+  }
+  @media (max-width:860px){
+    .nav-toggle{display:inline-flex;margin-left:auto;}
+    .nav-links{
+      display:none;
+      width:100%;
+      flex-direction:column;
+      align-items:stretch;
+      padding-bottom:.5rem;
+    }
+    .nav-links.open{display:flex;}
+    .nav-links a{min-height:44px;}
+  }
+
+  /* ===== Layout ===== */
+  main{display:block;}
+  .container{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 1.25rem;
+  }
+  section{padding:3.5rem 0;}
+  section + section{border-top:1px solid var(--border);}
+
+  .section-head{max-width:760px;margin-bottom:1.75rem;}
+  .section-head h2{
+    font-size:1.7rem;
+    margin:0 0 .5rem;
+    letter-spacing:-.01em;
+  }
+  .section-head p{color:var(--text-sec);margin:0;}
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:.78rem;
+    color:var(--action);
+    font-weight:700;
+    margin:0 0 .35rem;
+  }
+
+  /* ===== Buttons ===== */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.5rem;
+    min-height:44px;
+    padding:.7rem 1.1rem;
+    border-radius:var(--radius-sm);
+    font-weight:600;
+    font-size:.95rem;
+    text-decoration:none;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:background .15s,border-color .15s,color .15s,transform .1s;
+  }
+  .btn-primary{background:var(--action);color:#fff;}
+  .btn-primary:hover{background:var(--action-hover);}
+  .btn-outline{background:var(--surface);color:var(--action);border-color:var(--border);}
+  .btn-outline:hover{background:var(--bg);}
+  .btn-ghost{background:transparent;color:var(--text-sec);border-color:transparent;}
+  .btn-ghost:hover{background:var(--bg);color:var(--text);}
+  .btn:active{transform:translateY(1px);}
+
+  /* ===== Hero ===== */
+  .hero{
+    padding:3rem 0 2.5rem;
+    background:
+      radial-gradient(circle at 90% 10%, rgba(23,107,189,.06), transparent 40%),
+      radial-gradient(circle at 0% 90%, rgba(31,122,91,.05), transparent 35%),
+      var(--bg);
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:2.5rem;
+    align-items:center;
+  }
+  @media (max-width:880px){
+    .hero-grid{grid-template-columns:1fr;gap:2rem;}
+  }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+    background:rgba(154,103,0,.08);
+    color:var(--pending);
+    border:1px solid rgba(154,103,0,.25);
+    padding:.4rem .75rem;
+    border-radius:999px;
+    font-size:.82rem;
+    font-weight:600;
+    margin-bottom:1rem;
+  }
+  .badge svg{flex-shrink:0;}
+  h1{
+    font-size:2.4rem;
+    line-height:1.15;
+    margin:0 0 .75rem;
+    letter-spacing:-.02em;
+  }
+  @media (max-width:600px){h1{font-size:1.9rem;}}
+  .hero-sub{
+    font-size:1.08rem;
+    color:var(--text-sec);
+    max-width:560px;
+    margin:0 0 1.5rem;
+  }
+  .hero-ctas{display:flex;gap:.6rem;flex-wrap:wrap;}
+
+  /* Hero trail SVG */
+  .hero-trail{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:1.25rem;
+    box-shadow:var(--shadow-sm);
+  }
+  .hero-trail svg{width:100%;height:auto;display:block;}
+  .trail-legend{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:.5rem;
+    margin-top:1rem;
+    font-size:.78rem;
+    color:var(--text-sec);
+  }
+  .trail-legend span{display:flex;align-items:center;gap:.35rem;}
+  .trail-legend .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  /* ===== Cards generic ===== */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:1.25rem;
+    box-shadow:var(--shadow-sm);
+    transition:box-shadow .15s,transform .1s,border-color .15s;
+  }
+  .card.interactive{cursor:pointer;}
+  .card.interactive:hover{box-shadow:var(--shadow-md);border-color:var(--action);}
+  .card.interactive:active{transform:translateY(1px);}
+  .card h3{margin:0 0 .5rem;font-size:1.08rem;}
+  .card p{margin:0;color:var(--text-sec);font-size:.93rem;}
+  .card .card-meta{font-size:.82rem;color:var(--text-sec);margin-top:.6rem;}
+
+  .grid{display:grid;gap:1rem;}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:980px){
+    .grid-3,.grid-4{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:600px){
+    .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  }
+
+  /* ===== Colaboração ===== */
+  .colab-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:1rem;
+    margin-bottom:1.5rem;
+  }
+  @media (max-width:880px){.colab-grid{grid-template-columns:1fr;}}
+  .colab-col{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:1.25rem;
+    border-top:3px solid var(--action);
+  }
+  .colab-col.middle{border-top-color:var(--success);}
+  .colab-col.right{border-top-color:var(--pending);}
+  .colab-col h3{
+    margin:0 0 .35rem;
+    font-size:1.05rem;
+    display:flex;align-items:center;gap:.5rem;
+  }
+  .colab-col .role-label{
+    font-size:.74rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--text-sec);
+    font-weight:700;
+    margin:0 0 .75rem;
+  }
+  .colab-col ul{margin:.5rem 0 0;padding-left:1.1rem;font-size:.92rem;color:var(--text-sec);}
+  .colab-col li{margin-bottom:.35rem;}
+
+  .quote{
+    background:rgba(23,107,189,.04);
+    border-left:4px solid var(--action);
+    padding:1rem 1.25rem;
+    border-radius:0 var(--radius) var(--radius) 0;
+    color:var(--text);
+    font-size:1.02rem;
+    margin-top:1rem;
+  }
+  .quote::before{
+    content:"";
+    display:block;
+    font-size:2rem;
+    line-height:0;
+    color:var(--action);
+  }
+
+  /* ===== Possibilidades (cards expandidos) ===== */
+  .poss-card .poss-summary{cursor:pointer;list-style:none;}
+  .poss-card .poss-summary::-webkit-details-marker{display:none;}
+  .poss-card .poss-summary{display:block;}
+  .poss-card .poss-title{
+    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  }
+  .poss-card .poss-title .chev{transition:transform .2s;color:var(--text-sec);}
+  .poss-card[open] .poss-title .chev{transform:rotate(180deg);}
+  .poss-card .poss-body{
+    margin-top:.85rem;padding-top:.85rem;border-top:1px dashed var(--border);
+  }
+  .poss-body dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.35rem .75rem;font-size:.88rem;}
+  .poss-body dt{color:var(--text-sec);font-weight:600;}
+  .poss-body dd{margin:0;color:var(--text);}
+
+  .pill{
+    display:inline-flex;align-items:center;
+    padding:.15rem .5rem;border-radius:999px;
+    font-size:.74rem;font-weight:600;
+    background:rgba(23,107,189,.1);color:var(--action);
+  }
+  .pill.green{background:rgba(31,122,91,.12);color:var(--success);}
+  .pill.amber{background:rgba(154,103,0,.12);color:var(--pending);}
+  .pill.red{background:rgba(180,35,24,.1);color:var(--alert);}
+  .pill.gray{background:rgba(73,101,125,.12);color:var(--text-sec);}
+
+  /* ===== Jornada timeline ===== */
+  .timeline{position:relative;padding-left:2.2rem;}
+  .timeline::before{
+    content:"";position:absolute;left:.7rem;top:.5rem;bottom:.5rem;
+    width:2px;background:var(--border);
+  }
+  .step{position:relative;margin-bottom:1rem;}
+  .step::before{
+    content:"";position:absolute;left:-1.85rem;top:1.05rem;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--surface);border:3px solid var(--action);
+  }
+  .step.done::before{background:var(--success);border-color:var(--success);}
+  .step details{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-sm);
+    overflow:hidden;
+  }
+  .step summary{
+    cursor:pointer;
+    padding:1rem 1.1rem;
+    list-style:none;
+    display:flex;align-items:center;gap:.75rem;
+    min-height:44px;
+  }
+  .step summary::-webkit-details-marker{display:none;}
+  .step summary .num{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--bg);border:1px solid var(--border);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:.85rem;color:var(--action);
+    flex-shrink:0;
+  }
+  .step summary .stitle{font-weight:600;}
+  .step summary .chev{margin-left:auto;color:var(--text-sec);transition:transform .2s;}
+  .step details[open] summary .chev{transform:rotate(180deg);}
+  .step .step-body{padding:0 1.1rem 1.1rem;}
+  .step .step-body h4{margin:1rem 0 .35rem;font-size:.95rem;color:var(--text);}
+  .step .step-body p{margin:0 0 .4rem;font-size:.92rem;color:var(--text-sec);}
+  .step .step-body .ready{
+    margin-top:.6rem;padding:.55rem .75rem;border-radius:var(--radius-sm);
+    background:rgba(31,122,91,.08);color:var(--success);
+    font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:.4rem;
+  }
+
+  /* ===== Cenários ===== */
+  .cen-toolbar{
+    display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:1.25rem;
+  }
+  .cen-toolbar .filters{
+    display:flex;flex-wrap:wrap;gap:.4rem;flex:1;
+  }
+  .filter-chip{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text-sec);
+    padding:.45rem .75rem;
+    border-radius:999px;
+    font-size:.82rem;font-weight:600;
+    cursor:pointer;min-height:36px;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .filter-chip[aria-pressed="true"]{
+    background:var(--action);color:#fff;border-color:var(--action);
+  }
+  .filter-chip:hover{border-color:var(--action);}
+  .cen-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;
+  }
+  .scenario-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.1rem;cursor:pointer;box-shadow:var(--shadow-sm);
+    transition:box-shadow .15s,border-color .15s,transform .1s;
+    display:flex;flex-direction:column;gap:.5rem;
+  }
+  .scenario-card:hover{box-shadow:var(--shadow-md);border-color:var(--action);}
+  .scenario-card[aria-pressed="true"]{border-color:var(--action);box-shadow:0 0 0 2px var(--action);}
+  .scenario-card h3{margin:0;font-size:1rem;}
+  .scenario-card .tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:auto;}
+  .scenario-card .tag{
+    font-size:.72rem;padding:.15rem .45rem;border-radius:4px;
+    background:rgba(73,101,125,.1);color:var(--text-sec);
+  }
+  .empty-state{
+    padding:2rem;text-align:center;color:var(--text-sec);
+    border:1px dashed var(--border);border-radius:var(--radius);
+    background:var(--surface);
+  }
+  .empty-state svg{margin-bottom:.5rem;}
+
+  .scenario-detail{
+    margin-top:1.5rem;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow-sm);overflow:hidden;
+  }
+  .scenario-detail[hidden]{display:none;}
+  .scenario-detail .sd-head{
+    padding:1rem 1.25rem;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;
+    background:rgba(23,107,189,.03);
+  }
+  .scenario-detail .sd-head h3{margin:0;font-size:1.1rem;}
+  .scenario-detail .sd-body{padding:1.25rem;}
+  .scenario-detail dl{display:grid;grid-template-columns:1fr;gap:1rem;margin:0;}
+  @media (min-width:680px){
+    .scenario-detail dl{grid-template-columns:1fr 1fr;}
+  }
+  .scenario-detail .field{background:var(--bg);border-radius:var(--radius-sm);padding:.75rem .9rem;}
+  .scenario-detail .field dt{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec);font-weight:700;margin-bottom:.3rem;}
+  .scenario-detail .field dd{margin:0;font-size:.92rem;}
+  .scenario-detail .field dd ul{margin:0;padding-left:1.1rem;}
+  .scenario-detail .field dd li{margin-bottom:.2rem;}
+  .scenario-detail .next-step{
+    margin-top:1rem;padding:.85rem 1rem;border-radius:var(--radius-sm);
+    background:rgba(31,122,91,.08);border-left:4px solid var(--success);
+    color:var(--text);font-size:.92rem;
+  }
+  .scenario-detail .next-step strong{color:var(--success);}
+
+  /* ===== Painel tabs ===== */
+  .tabs{display:flex;flex-wrap:wrap;gap:.25rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;}
+  .tab-btn{
+    background:none;border:none;cursor:pointer;
+    padding:.7rem .9rem;font-size:.9rem;font-weight:600;color:var(--text-sec);
+    border-bottom:2px solid transparent;min-height:44px;
+    transition:color .15s,border-color .15s;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn[aria-selected="true"]{color:var(--action);border-bottom-color:var(--action);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);}
+  table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:560px;}
+  thead th{
+    text-align:left;padding:.8rem 1rem;background:var(--bg);
+    border-bottom:1px solid var(--border);color:var(--text-sec);
+    font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;
+  }
+  tbody td{padding:.75rem 1rem;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(23,107,189,.02);}
+
+  /* ===== Radar ===== */
+  .radar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;}
+  @media (max-width:980px){.radar-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.radar-grid{grid-template-columns:1fr;}}
+  .radar-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.1rem;text-align:center;box-shadow:var(--shadow-sm);
+    display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  }
+  .radar-icon{
+    width:44px;height:44px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:rgba(23,107,189,.1);color:var(--action);flex-shrink:0;
+  }
+  .radar-card[data-tone="success"] .radar-icon{background:rgba(31,122,91,.12);color:var(--success);}
+  .radar-card[data-tone="amber"] .radar-icon{background:rgba(154,103,0,.12);color:var(--pending);}
+  .radar-card[data-tone="alert"] .radar-icon{background:rgba(180,35,24,.1);color:var(--alert);}
+  .radar-card[data-tone="gray"] .radar-icon{background:rgba(73,101,125,.12);color:var(--text-sec);}
+  .radar-card h3{margin:0;font-size:.95rem;}
+  .radar-card p{margin:0;font-size:.82rem;color:var(--text-sec);}
+
+  /* ===== Automação ===== */
+  .auto-note{
+    margin-top:1rem;padding:.9rem 1.1rem;border-radius:var(--radius-sm);
+    background:rgba(154,103,0,.08);border-left:4px solid var(--pending);
+    color:var(--text);font-size:.95rem;
+  }
+
+  /* ===== Biblioteca ===== */
+  .lib-card .lib-icon{
+    width:36px;height:36px;border-radius:var(--radius-sm);
+    background:rgba(23,107,189,.08);color:var(--action);
+    display:inline-flex;align-items:center;justify-content:center;margin-bottom:.6rem;
+  }
+  .lib-card details{margin-top:.6rem;}
+  .lib-card summary{cursor:pointer;font-size:.85rem;color:var(--action);font-weight:600;min-height:36px;display:flex;align-items:center;}
+  .lib-card .lib-detail{margin-top:.5rem;font-size:.88rem;color:var(--text-sec);padding-top:.5rem;border-top:1px dashed var(--border);}
+
+  /* ===== Checklist demonstrativo ===== */
+  .checklist{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.25rem;box-shadow:var(--shadow-sm);
+  }
+  .checklist h3{margin:0 0 .75rem;font-size:1.05rem;}
+  .check-item{
+    display:flex;align-items:flex-start;gap:.65rem;padding:.6rem 0;border-bottom:1px dashed var(--border);
+  }
+  .check-item:last-child{border-bottom:none;}
+  .check-item input{margin-top:.2rem;accent-color:var(--success);width:18px;height:18px;flex-shrink:0;}
+  .check-item label{font-size:.93rem;color:var(--text);cursor:pointer;flex:1;}
+  .check-item.done label{text-decoration:line-through;color:var(--text-sec);}
+
+  /* ===== Footer ===== */
+  .site-footer{
+    background:var(--surface);border-top:1px solid var(--border);padding:2rem 0;margin-top:1rem;
+  }
+  .footer-warn{
+    background:rgba(180,35,24,.05);border:1px solid rgba(180,35,24,.2);
+    border-radius:var(--radius);padding:1rem 1.15rem;color:var(--text);
+    font-size:.92rem;margin-bottom:1.25rem;
+  }
+  .footer-warn strong{color:var(--alert);}
+  .footer-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;
+  }
+  @media (max-width:680px){.footer-grid{grid-template-columns:1fr;}}
+  .footer-links{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;}
+  .footer-links a{color:var(--action);text-decoration:none;font-size:.9rem;min-height:44px;display:inline-flex;align-items:center;}
+  .footer-links a:hover{text-decoration:underline;}
+  .footer-meta{font-size:.82rem;color:var(--text-sec);}
+
+  /* ===== Status / aria-live ===== */
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+  .status-live{
+    position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;
+  }
+  .status-live.flash{
+    position:fixed;left:1rem;bottom:1rem;width:auto;height:auto;
+    background:var(--text);color:#fff;padding:.7rem 1rem;border-radius:var(--radius-sm);
+    box-shadow:var(--shadow-md);font-size:.9rem;z-index:1000;
+    animation:slideIn .2s ease;
+  }
+  @keyframes slideIn{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+  /* small helpers */
+  .muted{color:var(--text-sec);}
+  .stack-sm > * + *{margin-top:.5rem;}
+  .stack > * + *{margin-top:1rem;}
+  hr.div{border:none;border-top:1px solid var(--border);margin:1.25rem 0;}
+</style>
+</head>
+<body>
+<a href="#conteudo" class="skip-link">Pular para o conteúdo principal</a>
+
+<header class="site-header">
+  <div class="nav-wrap">
+    <a href="#topo" class="brand" aria-label="Privacy Engineering Sandbox — início">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="24" height="24" rx="6" fill="#176BBD"/>
+        <path d="M14 6 L22 10 V15 C22 19 18.5 22 14 23 C9.5 22 6 19 6 15 V10 Z" fill="#FFFFFF" opacity="0.95"/>
+        <path d="M10 14 L13 17 L18 11" stroke="#1F7A5B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span>Privacy Engineering Sandbox</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navlinks">Menu</button>
+    <nav class="nav-links" id="navlinks" aria-label="Navegação principal">
+      <a href="#colaboracao">Colaboração</a>
+      <a href="#mapa">Possibilidades</a>
+      <a href="#jornada">Jornada</a>
+      <a href="#cenarios">Cenários</a>
+      <a href="#painel">Painel</a>
+      <a href="#radar">Radar</a>
+      <a href="#automacao">Automação</a>
+      <a href="#biblioteca">Biblioteca</a>
+      <a href="#limites">Limites</a>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo">
+<span id="topo" tabindex="-1"></span>
+
+<!-- ============ HERO ============ -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="container hero-grid">
+    <div>
+      <span class="badge">
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 4 V8 M7 9.5 V10.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Laboratório público — use apenas dados sintéticos
+      </span>
+      <h1 id="hero-title">Privacy Engineering Sandbox</h1>
+      <p class="hero-sub">
+        Bancada educacional com cenários inteiramente sintéticos para praticar como
+        <strong>processo, dados, sistemas, evidências, lacunas, riscos, recomendações e validação humana</strong>
+        se conectam em Engenharia de Privacidade. Nada aqui é produção, jurídico ou decisão — é prática orientada a processo.
+      </p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#cenarios">Explorar cenários</a>
+        <a class="btn btn-outline" href="#jornada">Ver jornada</a>
+        <a class="btn btn-ghost" href="#limites">Consultar limites</a>
+      </div>
+    </div>
+
+    <div class="hero-trail" role="img" aria-label="Trilha sintética: Processo, Dados, Evidência, Lacuna, Validação e Decisão conectados em sequência.">
+      <svg viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#49657D"/>
+          </marker>
+        </defs>
+        <!-- trail path -->
+        <path d="M 40 130 Q 110 60 180 130 T 320 130 T 460 130" fill="none" stroke="#D7E2EC" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/>
+        <!-- nodes -->
+        <g font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" fill="#17324D" text-anchor="middle">
+          <g transform="translate(40,130)">
+            <circle r="22" fill="#FFFFFF" stroke="#176BBD" stroke-width="2.5"/>
+            <text y="3" font-weight="700" fill="#176BBD">1</text>
+            <text y="42">Processo</text>
+          </g>
+          <g transform="translate(140,90)">
+            <circle r="22" fill="#FFFFFF" stroke="#176BBD" stroke-width="2.5"/>
+            <text y="3" font-weight="700" fill="#176BBD">2</text>
+            <text y="-30">Dados</text>
+          </g>
+          <g transform="translate(240,130)">
+            <circle r="22" fill="#FFFFFF" stroke="#1F7A5B" stroke-width="2.5"/>
+            <text y="3" font-weight="700" fill="#1F7A5B">3</text>
+            <text y="42">Evidência</text>
+          </g>
+          <g transform="translate(340,90)">
+            <circle r="22" fill="#FFFFFF" stroke="#9A6700" stroke-width="2.5"/>
+            <text y="3" font-weight="700" fill="#9A6700">4</text>
+            <text y="-30">Lacuna</text>
+          </g>
+          <g transform="translate(440,130)">
+            <circle r="22" fill="#FFFFFF" stroke="#1F7A5B" stroke-width="2.5"/>
+            <text y="3" font-weight="700" fill="#1F7A5B">5</text>
+            <text y="42">Validação</text>
+          </g>
+        </g>
+        <!-- final decision marker -->
+        <g transform="translate(488,130)">
+          <rect x="-14" y="-14" width="28" height="28" rx="6" fill="#17324D"/>
+          <path d="M -6 0 L -2 4 L 6 -4" stroke="#FFFFFF" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <text x="488" y="172" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="11" fill="#17324D" text-anchor="middle" font-weight="700">Decisão</text>
+      </svg>
+      <div class="trail-legend" aria-hidden="true">
+        <span><span class="dot" style="background:#176BBD"></span> Mapear</span>
+        <span><span class="dot" style="background:#1F7A5B"></span> Validar</span>
+        <span><span class="dot" style="background:#9A6700"></span> Investigar</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COLABORAÇÃO ============ -->
+<section id="colaboracao" aria-labelledby="colab-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Colaboração da dupla</p>
+      <h2 id="colab-title">Engenharia e Advocacia/Privacidade no mesmo espaço compartilhado</h2>
+      <p>Duas responsabilidades distintas que convergem para uma recomendação verificável. Nenhuma das duas substitui a outra; ambas precisam de evidência.</p>
+    </div>
+
+    <div class="colab-grid">
+      <article class="colab-col">
+        <p class="role-label">Função técnica</p>
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 2 L13 2 L13 5 L17 5 L17 18 L3 18 L3 5 L7 5 Z" fill="none" stroke="#176BBD" stroke-width="1.5"/><path d="M7 9 H13 M7 12 H13 M7 15 H10" stroke="#176BBD" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Engenharia de Privacidade
+        </h3>
+        <ul>
+          <li>Processo, sistemas e integrações</li>
+          <li>APIs, logs, dependências e fluxos de dados</li>
+          <li>Viabilidade técnica de controles e automações</li>
+          <li>Evidências operacionais e rastreabilidade</li>
+        </ul>
+      </article>
+
+      <article class="colab-col middle">
+        <p class="role-label">Espaço compartilhado</p>
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="#1F7A5B" stroke-width="1.5"/><path d="M6 10 L9 13 L14 7" stroke="#1F7A5B" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Espaço compartilhado
+        </h3>
+        <ul>
+          <li>Fatos, evidências e lacunas registradas</li>
+          <li>Riscos e priorização de backlog</li>
+          <li>Recomendações e hipóteses de automação</li>
+          <li>Decisões pendentes e próximo passo seguro</li>
+        </ul>
+      </article>
+
+      <article class="colab-col right">
+        <p class="role-label">Função jurídica/privacidade</p>
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 L17 5 V11 C17 14.5 14 17.5 10 18.5 C6 17.5 3 14.5 3 11 V5 Z" fill="none" stroke="#9A6700" stroke-width="1.5"/><path d="M7 9 L9 11 L13 7" stroke="#9A6700" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Advocacia/Privacidade
+        </h3>
+        <ul>
+          <li>Finalidade, retenção e obrigações aplicáveis</li>
+          <li>Direitos do titular e transparência</li>
+          <li>Aprovações e validação formal</li>
+          <li>Interpretação de regras e exceções</li>
+        </ul>
+      </article>
+    </div>
+
+    <blockquote class="quote">
+      A engenharia não decide o jurídico; o jurídico não precisa operar a tecnologia. Ambos usam evidências para construir uma recomendação verificável.
+    </blockquote>
+  </div>
+</section>
+
+<!-- ============ MAPA DE POSSIBILIDADES ============ -->
+<section id="mapa" aria-labelledby="mapa-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Mapa de possibilidades</p>
+      <h2 id="mapa-title">O que esta bancada permite investigar</h2>
+      <p>Cada cartão descreve objetivo, entrada, saída esperada, áreas envolvidas e limites de atuação. Todos os exemplos são fictícios.</p>
+    </div>
+
+    <div class="grid grid-3" id="poss-grid">
+      <!-- Cards são injetados via JS para manter consistência -->
+    </div>
+  </div>
+</section>
+
+<!-- ============ JORNADA ============ -->
+<section id="jornada" aria-labelledby="jornada-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Jornada de análise</p>
+      <h2 id="jornada-title">Seis etapas, do cenário à validação humana</h2>
+      <p>Clique em cada etapa para ver por que importa, quem faz o quê, qual evidência buscar e qual é o sinal de pronto.</p>
+    </div>
+
+    <ol class="timeline" id="timeline" aria-label="Jornada de análise em seis etapas">
+      <!-- Injetado via JS -->
+    </ol>
+  </div>
+</section>
+
+<!-- ============ CENÁRIOS ============ -->
+<section id="cenarios" aria-labelledby="cen-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Cenários sintéticos</p>
+      <h2 id="cen-title">Catálogo filtrável de casos fictícios</h2>
+      <p>Filtre por tag, selecione um cenário e veja a ficha sintética com processo, dados, sistemas, lacunas, riscos e próximo passo seguro.</p>
+    </div>
+
+    <div class="cen-toolbar">
+      <div class="filters" id="cen-filters" role="group" aria-label="Filtrar cenários por tag"></div>
+      <button class="btn btn-outline" id="cen-reset" type="button">Limpar filtros</button>
+    </div>
+
+    <div class="cen-grid" id="cen-grid" aria-live="polite"></div>
+
+    <div class="scenario-detail" id="cen-detail" hidden aria-live="polite">
+      <!-- Preenchido via JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAINEL COMPARTILHADO ============ -->
+<section id="painel" aria-labelledby="painel-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Painel compartilhado</p>
+      <h2 id="painel-title">Vista sintética do que está em jogo</h2>
+      <p>Demonstração local, sem backend. Use as abas para alternar entre contextos do mesmo caso fictício.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Dimensões do painel compartilhado">
+      <button class="tab-btn" role="tab" id="tab-contexto" aria-controls="panel-contexto" aria-selected="true">Contexto</button>
+      <button class="tab-btn" role="tab" id="tab-processo" aria-controls="panel-processo" aria-selected="false">Processo</button>
+      <button class="tab-btn" role="tab" id="tab-dados" aria-controls="panel-dados" aria-selected="false">Dados</button>
+      <button class="tab-btn" role="tab" id="tab-sistemas" aria-controls="panel-sistemas" aria-selected="false">Sistemas</button>
+      <button class="tab-btn" role="tab" id="tab-evidencias" aria-controls="panel-evidencias" aria-selected="false">Evidências</button>
+      <button class="tab-btn" role="tab" id="tab-lacunas" aria-controls="panel-lacunas" aria-selected="false">Lacunas</button>
+      <button class="tab-btn" role="tab" id="tab-riscos" aria-controls="panel-riscos" aria-selected="false">Riscos</button>
+      <button class="tab-btn" role="tab" id="tab-recom" aria-controls="panel-recom" aria-selected="false">Recomendações</button>
+      <button class="tab-btn" role="tab" id="tab-aprov" aria-controls="panel-aprov" aria-selected="false">Aprovações</button>
+    </div>
+
+    <div class="tab-panel active" id="panel-contexto" role="tabpanel" aria-labelledby="tab-contexto" tabindex="0">
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Contexto geral do caso sintético</caption>
+          <thead><tr><th>Item</th><th>Descrição</th><th>Responsável a consultar</th></tr></thead>
+          <tbody>
+            <tr><td>Caso sintético</td><td>Revisão de retenção em sistema legado fictício</td><td>Engenharia e Privacidade</td></tr>
+            <tr><td>Finalidade declarada</td><td>Apoiar decisão de descarte ou manutenção com evidência</td><td>Privacidade e Jurídico</td></tr>
+            <tr><td>Estado atual</td><td>Hipótese — não há decisão tomada</td><td>Engenharia</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-processo" role="tabpanel" aria-labelledby="tab-processo" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Processo sintético mapeado</caption>
+          <thead><tr><th>Etapa</th><th>Atividade</th><th>Próximo passo</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Identificar registros sintéticos candidatos à revisão</td><td>Confirmar domínio funcional</td></tr>
+            <tr><td>2</td><td>Levantar fluxo de geração e consumo</td><td>Desenhar BPMN sintético</td></tr>
+            <tr><td>3</td><td>Registrar premissas e lacunas</td><td>Encaminhar à validação</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-dados" role="tabpanel" aria-labelledby="tab-dados" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Dados fictícios envolvidos</caption>
+          <thead><tr><th>Campo sintético</th><th>Categoria</th><th>Observação</th></tr></thead>
+          <tbody>
+            <tr><td>cod_registro_sintetico</td><td>Identificador fictício</td><td>Sem dado real</td></tr>
+            <tr><td>tipo_evento</td><td>Operacional</td><td>Define regra de retenção aplicável</td></tr>
+            <tr><td>data_criacao</td><td>Temporal</td><td>Base para ciclo de vida</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-sistemas" role="tabpanel" aria-labelledby="tab-sistemas" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Sistemas fictícios envolvidos</caption>
+          <thead><tr><th>Sistema</th><th>Papel</th><th>Dependência</th></tr></thead>
+          <tbody>
+            <tr><td>Sandbox-Legado-A</td><td>Origem sintética</td><td>Backup não mapeado</td></tr>
+            <tr><td>Sandbox-Index-B</td><td>Consulta sintética</td><td>API interna fictícia</td></tr>
+            <tr><td>Sandbox-Archive-C</td><td>Armazenamento sintético</td><td>Política indefinida</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-evidencias" role="tabpanel" aria-labelledby="tab-evidencias" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Evidências coletadas</caption>
+          <thead><tr><th>Evidência</th><th>Tipo</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>Log sintético de criação</td><td>Operacional</td><td>Parcial</td></tr>
+            <tr><td>Política de retenção documentada</td><td>Documental</td><td>Ausente</td></tr>
+            <tr><td>Aprovação formal de descarte</td><td>Decisória</td><td>Pendente</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-lacunas" role="tabpanel" aria-labelledby="tab-lacunas" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-table">Lacunas registradas no caso sintético</caption>
+          <thead><tr><th>Tipo</th><th>Item</th><th>Responsável a consultar</th><th>Próximo passo</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill amber">Lacuna</span></td><td>Prazo de retenção não documentado</td><td>Privacidade e Jurídico</td><td>Validar regra aplicável</td></tr>
+            <tr><td><span class="pill gray">Dependência</span></td><td>Backup não mapeado</td><td>Segurança e TI</td><td>Levantar recuperação</td></tr>
+            <tr><td><span class="pill">Hipótese</span></td><td>Regra detectiva de campos ausentes</td><td>Engenharia e Privacidade</td><td>Criar cenário de teste</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-riscos" role="tabpanel" aria-labelledby="tab-riscos" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Riscos a investigar</caption>
+          <thead><tr><th>Risco</th><th>Área</th><th>Sinal de mitigação</th></tr></thead>
+          <tbody>
+            <tr><td>Retenção além do necessário</td><td>Privacidade</td><td>Regra documentada e validada</td></tr>
+            <tr><td>Acesso sem segregação clara</td><td>Segurança</td><td>Matriz de papéis revisada</td></tr>
+            <tr><td>Dependência de sistema em transição</td><td>Engenharia</td><td>Plano de continuidade sintético</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-recom" role="tabpanel" aria-labelledby="tab-recom" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Recomendações em formulação</caption>
+          <thead><tr><th>Recomendação</th><th>Base</th><th>Próximo passo</th></tr></thead>
+          <tbody>
+            <tr><td>Documentar regra de retenção aplicável</td><td>Lacuna identificada</td><td>Submeter à validação jurídica</td></tr>
+            <tr><td>Mapear backup antes de qualquer ação</td><td>Dependência em aberto</td><td>Acionar Segurança e TI</td></tr>
+            <tr><td>Prototipar regra detectiva em sandbox</td><td>Hipótese técnica</td><td>Criar cenário de teste sintético</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-aprov" role="tabpanel" aria-labelledby="tab-aprov" tabindex="0" hidden>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Aprovações pendentes</caption>
+          <thead><tr><th>Decisão</th><th>Aprovador competente</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>Validar regra de retenção</td><td>Privacidade/Jurídico</td><td>Pendente</td></tr>
+            <tr><td>Aceitar hipótese de automação</td><td>Engenharia + Privacidade</td><td>Em formulação</td></tr>
+            <tr><td>Autorizar descarte (simulado)</td><td>Aprovador formal</td><td>Não iniciado</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RADAR DE DECISÃO ============ -->
+<section id="radar" aria-labelledby="radar-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Radar de decisão</p>
+      <h2 id="radar-title">Cinco estados para classificar uma informação</h2>
+      <p>Cada estado tem ícone e rótulo — não confie apenas na cor. Use o radar antes de registrar uma recomendação.</p>
+    </div>
+
+    <div class="radar-grid">
+      <article class="radar-card" data-tone="success">
+        <span class="radar-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 11 L10 14 L15 8" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h3>Fato informado</h3>
+        <p>Confirmado por evidência documental ou operacional.</p>
+      </article>
+
+      <article class="radar-card" data-tone="amber">
+        <span class="radar-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2 L20 19 H2 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 9 V13 M11 15.5 V16.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        <h3>Premissa a validar</h3>
+        <p>Assumida por ora, precisa de confirmação competente.</p>
+      </article>
+
+      <article class="radar-card" data-tone="amber">
+        <span class="radar-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 6 V12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="11" cy="15.5" r="1.2" fill="currentColor"/></svg>
+        </span>
+        <h3>Lacuna de evidência</h3>
+        <p>Falta dado, documento ou validação. Bloqueia decisão.</p>
+      </article>
+
+      <article class="radar-card" data-tone="alert">
+        <span class="radar-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 6 V13 M11 15.5 V16.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        <h3>Risco a investigar</h3>
+        <p>Possível impacto — investigar antes de recomendar.</p>
+      </article>
+
+      <article class="radar-card" data-tone="gray">
+        <span class="radar-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 11 a4 4 0 1 1 8 0 a4 4 0 0 1 -8 0" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="11" cy="11" r="1.4" fill="currentColor"/></svg>
+        </span>
+        <h3>Decisão dependente</h3>
+        <p>Aguarda aprovador competente. Não executar.</p>
+      </article>
+    </div>
+
+    <blockquote class="quote" style="margin-top:1.5rem;border-left-color:var(--pending);background:rgba(154,103,0,.04);">
+      O sandbox ajuda a converter incerteza em uma pergunta verificável; não substitui o decisor competente.
+    </blockquote>
+  </div>
+</section>
+
+<!-- ============ LAB DE AUTOMAÇÃO ============ -->
+<section id="automacao" aria-labelledby="auto-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Laboratório de automação</p>
+      <h2 id="auto-title">Automação como hipótese, nunca como decisão automática</h2>
+      <p>Cada tipo de automação tem um exemplo seguro e um limite explícito. Toda automação proposta precisa de evidência, avaliação técnica e validação humana.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">Tipos de automação assistiva e seus limites</caption>
+        <thead><tr><th>Tipo</th><th>Exemplo seguro</th><th>Limite</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill green">Assistiva</span></td>
+            <td>Gerar checklist de campos ausentes</td>
+            <td>Não aprova informação</td>
+          </tr>
+          <tr>
+            <td><span class="pill amber">Detectiva</span></td>
+            <td>Sinalizar retenção sem evidência</td>
+            <td>Não decide validade jurídica</td>
+          </tr>
+          <tr>
+            <td><span class="pill">Preventiva</span></td>
+            <td>Bloquear template sintético incompleto</td>
+            <td>Não bloqueia produção</td>
+          </tr>
+          <tr>
+            <td><span class="pill red">Corretiva</span></td>
+            <td>Criar pendência de revisão</td>
+            <td>Não exclui dados nem altera produção</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="auto-note">
+      <strong>Lembrete:</strong> automação é uma hipótese que requer evidência, avaliação técnica e validação humana.
+      Nenhuma automação deste sandbox executa descarte, retenção, aceitação de risco ou mudança produtiva.
+    </div>
+
+    <div class="checklist" style="margin-top:1.5rem;">
+      <h3>Checklist demonstrativo — avaliar uma hipótese de automação</h3>
+      <p class="muted" style="margin:.25rem 0 .75rem;font-size:.88rem;">Progresso local apenas (preferência do navegador). Não envia dados a lugar nenhum.</p>
+      <div id="checklist-items"></div>
+      <div class="status-live" id="check-status" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BIBLIOTECA ============ -->
+<section id="biblioteca" aria-labelledby="bib-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">Biblioteca de artefatos</p>
+      <h2 id="bib-title">Referências conceituais do sandbox</h2>
+      <p>Acesso conceitual — não há arquivos externos sendo abertos. Cada cartão descreve o artefato e como ele se encaixa na jornada.</p>
+    </div>
+
+    <div class="grid grid-3" id="lib-grid">
+      <!-- Injetado via JS -->
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer" id="limites">
+  <div class="container">
+    <div class="footer-warn">
+      <strong>Aviso obrigatório.</strong> Protótipo educacional e experimental. Não processe dados pessoais reais ou informações internas de clientes.
+      Recomendações, retenção, descarte, risco e alterações produtivas exigem validação pelas áreas e aprovadores competentes.
+    </div>
+
+    <div class="footer-grid">
+      <nav class="footer-links" aria-label="Links internos do rodapé">
+        <a href="#topo">Início</a>
+        <a href="#colaboracao">Colaboração</a>
+        <a href="#jornada">Jornada</a>
+        <a href="#cenarios">Cenários</a>
+        <a href="#painel">Painel</a>
+        <a href="#radar">Radar</a>
+        <a href="#automacao">Automação</a>
+        <a href="#biblioteca">Biblioteca</a>
+      </nav>
+      <div class="footer-meta">
+        <p style="margin:0 0 .35rem;"><strong>Dados sintéticos:</strong> todos os nomes de sistemas, processos, campos e pessoas neste arquivo são fictícios.</p>
+        <p style="margin:0 0 .35rem;"><strong>Segurança:</strong> não inclua credenciais, tokens, URLs privadas nem variáveis de ambiente reais.</p>
+        <p style="margin:0 0 .35rem;"><strong>Limites de uso:</strong> use apenas para aprendizado, demonstração e prática orientada a processo.</p>
+        <p style="margin:0;"><strong>Como contribuir:</strong> proponha cenários sintéticos, abra issues com perguntas verificáveis e registre lacunas como hipóteses.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ Dados sintéticos ============ */
+
+  var POSSIBILIDADES = [
+    {t:"Triagem de legado e auditoria", obj:"Identificar sistemas sintéticos candidatos a revisão.", ent:"Inventário sintético, dependências.", sai:"Lista priorizada de candidatos.", areas:"Engenharia, Segurança", lim:"Não decide descarte."},
+    {t:"Completude de ROPA/RIPD sintético", obj:"Avaliar se o registro sintético cobre finalidade e retenção.", ent:"ROPA/RIPD sintético.", sai:"Mapa de lacunas documentais.", areas:"Privacidade, Jurídico", lim:"Não substitui registro oficial."},
+    {t:"Processo, dados e sistemas", obj:"Conectar fluxo às tabelas e sistemas fictícios.", ent:"BPMN sintético, lista de campos.", sai:"Diagrama processo–dados–sistemas.", areas:"Engenharia", lim:"Não integra produção."},
+    {t:"Retenção e ciclo de vida", obj:"Praticar regras de retenção sobre dados sintéticos.", ent:"Regras fictícias, datas sintéticas.", sai:"Linha do tempo de ciclo de vida.", areas:"Privacidade, Engenharia", lim:"Não executa descarte."},
+    {t:"Evidências de controles", obj:"Listar evidências disponíveis e faltantes.", ent:"Logs sintéticos, documentos.", sai:"Matriz de evidências.", areas:"Engenharia, Segurança", lim:"Não atesta conformidade."},
+    {t:"Acesso e segregação", obj:"Avaliar matriz de papéis sintética.", ent:"Papéis fictícios, permissões.", sai:"Mapa de acessos e riscos.", areas:"Segurança, Engenharia", lim:"Não provisiona acessos."},
+    {t:"Integrações e fornecedores", obj:"Mapear integrações fictícias e fluxos externos.", ent:"Catálogo sintético de APIs.", sai:"Diagrama de dependências.", areas:"Engenharia, Privacidade", lim:"Não avalia contrato real."},
+    {t:"Automação assistiva", obj:"Formular hipóteses de automação detectiva/preventiva.", ent:"Regra candidata, evidência.", sai:"Protótipo de regra em sandbox.", areas:"Engenharia, Privacidade", lim:"Não decide validade jurídica."},
+    {t:"BPMN e DMN", obj:"Desenhar processo e tabela de decisão sintéticos.", ent:"Etapas, regras de decisão.", sai:"Fluxo BPMN + DMN sintético.", areas:"Engenharia", lim:"Não orquestra produção."},
+    {t:"Priorização de backlog", obj:"Ordenar lacunas e riscos por criticidade.", ent:"Lista de lacunas e riscos.", sai:"Backlog priorizado.", areas:"Engenharia, Privacidade", lim:"Não aprova execução."},
+    {t:"Relatórios executivos", obj:"Sintetizar estado do caso para decisão humana.", ent:"Evidências, lacunas, riscos.", sai:"Relatório sintético conciso.", areas:"Privacidade, Engenharia", lim:"Não substitui decisão formal."},
+    {t:"Critérios de aceite", obj:"Definir quando uma recomendação está pronta.", ent:"Recomendação, evidências.", sai:"Lista de critérios verificáveis.", areas:"Engenharia, Privacidade", lim:"Não aprova automaticamente."}
+  ];
+
+  var JORNADA = [
+    {t:"Definir cenário sintético e objetivo", why:"Sem objetivo claro, qualquer evidência parece relevante.", eng:"Propõe domínio técnico e viabilidade.", adv:"Clarifica finalidade e obrigações aplicáveis.", ev:"Objetivo escrito em uma frase.", who:"Engenharia + Privacidade.", ready:"Objetivo mensurável e sintético foi escrito."},
+    {t:"Mapear processo, dados, sistemas e responsáveis", why:"É a base sobre a qual lacunas aparecem.", eng:"Desenha BPMN sintético e lista sistemas fictícios.", adv:"Confirma finalidade e categorias de dados.", ev:"Diagrama e inventário sintéticos.", who:"Engenharia, com Privacidade.", ready:"Processo e sistemas sintéticos estão nomeados."},
+    {t:"Registrar fatos, premissas e lacunas", why:"Distinguir o que se sabe do que se assume.", eng:"Lista fatos técnicos e premissas.", adv:"Lista premissas jurídicas e lacunas documentais.", ev:"Tabela fatos vs. premissas vs. lacunas.", who:"Ambas as áreas.", ready:"Cada item tem estado no radar de decisão."},
+    {t:"Avaliar riscos e evidências", why:"É onde a hipótese vira recomendação defensável.", eng:"Avalia viabilidade técnica das mitigações.", adv:"Avalia obrigação e risco jurídico.", ev:"Matriz risco×evidência.", who:"Engenharia, Privacidade, Segurança.", ready:"Riscos têm sinal de mitigação."},
+    {t:"Formular recomendação ou hipótese de automação", why:"Recomendação é uma pergunta verificável, não uma decisão.", eng:"Propõe automação assistiva/detectiva com limite claro.", adv:"Propõe validação jurídica necessária.", ev:"Recomendação com base e próximo passo.", who:"Engenharia + Privacidade.", ready:"Recomendação tem aprovações pendentes explícitas."},
+    {t:"Encaminhar para validação humana e registrar próximo passo", why:"Decisão é humana e competente.", eng:"Documenta o que foi testado em sandbox.", adv:"Encaminha ao aprovador competente.", ev:"Registro de encaminhamento.", who:"Aprovador competente.", ready:"Há um próximo passo seguro registrado."}
+  ];
+
+  var CENARIOS = [
+    {id:"portaria", t:"Portaria e retenção de registros", tags:["legado","retenção"],
+      processo:"Revisão sintética de portaria que define prazos de registros fictícios.",
+      objetivo:"Avaliar se a retenção documentada cobre todos os eventos sintéticos.",
+      dados:["cod_registro_sintetico","tipo_evento","data_criacao"],
+      sistemas:["Sandbox-Legado-A","Sandbox-Archive-C"],
+      lacunas:["Prazo de retenção não documentado para tipo_evento=X"],
+      riscos:["Retenção além do necessário","Ausência de dono do processo"],
+      areas:["Privacidade","Jurídico","Engenharia"],
+      prox:"Validar regra aplicável com Privacidade/Jurídico antes de qualquer ação."},
+    {id:"legado-sem-dono", t:"Processo legado sem dono", tags:["legado","evidência"],
+      processo:"Fluxo sintético herdado sem responsável claro.",
+      objetivo:"Identificar dono e lacunas críticas.",
+      dados:["cod_fluxo_sintetico","estado_evento"],
+      sistemas:["Sandbox-Legado-A"],
+      lacunas:["Responsável não identificado","Documentação ausente"],
+      riscos:["Decisão sem accountability","Continuidade incerta"],
+      areas:["Engenharia","Segurança"],
+      prox:"Levantar responsável potencial e registrar como lacuna."},
+    {id:"integracao-fornecedor", t:"Integração fictícia com fornecedor", tags:["integracao","fornecedor"],
+      processo:"Integração sintética com fornecedor externo fictício.",
+      objetivo:"Mapear dados compartilhados e finalidade.",
+      dados:["cod_pedido_sintetico","categoria_cliente_sintetico"],
+      sistemas:["Sandbox-API-Fornecedor-X"],
+      lacunas:["Contrato sintético não mapeado","Finalidade não documentada"],
+      riscos:["Compartilhamento sem base clara"],
+      areas:["Privacidade","Jurídico","Engenharia"],
+      prox:"Validar base e finalidade do compartilhamento antes de prosseguir."},
+    {id:"sistema-transicao", t:"Sistema fictício em transição", tags:["legado","automação","BPMN"],
+      processo:"Migração sintética entre duas versões de sistema fictício.",
+      objetivo:"Garantir continuidade de evidências durante a transição.",
+      dados:["cod_migracao_sintetico","estado_migracao"],
+      sistemas:["Sandbox-Legado-A","Sandbox-Next-B"],
+      lacunas:["Plano de continuidade sintético incompleto"],
+      riscos:["Perda de rastreabilidade","Reprocesso sem evidência"],
+      areas:["Engenharia","Segurança"],
+      prox:"Desenhar BPMN sintético da transição e identificar pontos de verificação."},
+    {id:"revisao-acesso", t:"Revisão de acesso", tags:["acesso","evidência"],
+      processo:"Revisão sintética de matriz de papéis em sistema fictício.",
+      objetivo:"Identificar acessos excessivos ou sem segregação.",
+      dados:["cod_papel_sintetico","perm_sintetica"],
+      sistemas:["Sandbox-Index-B"],
+      lacunas:["Matriz de papéis desatualizada"],
+      riscos:["Acesso sem segregação clara"],
+      areas:["Segurança","Engenharia"],
+      prox:"Atualizar matriz sintética e validar com Segurança."},
+    {id:"direito-titular", t:"Solicitação simulada de direito do titular", tags:["acesso","automação"],
+      processo:"Fluxo sintético de solicitação de titular fictício.",
+      objetivo:"Praticar coleta e validação de evidências de atendimento.",
+      dados:["cod_solicitacao_sintetica","tipo_direito"],
+      sistemas:["Sandbox-Portal-Titular"],
+      lacunas:["SLA não documentado","Evidência de atendimento parcial"],
+      riscos:["Atraso sem justificativa registrada"],
+      areas:["Privacidade","Engenharia"],
+      prox:"Definir SLA sintético e checkpoint de evidência."},
+    {id:"coleta-excessiva", t:"Formulário com coleta excessiva", tags:["evidência","automação"],
+      processo:"Formulário sintético que coleta campos além da finalidade.",
+      objetivo:"Identificar campos desnecessários e propor redução.",
+      dados:["campo_extra_sintetico","finalidade_declarada"],
+      sistemas:["Sandbox-Forms-Y"],
+      lacunas:["Finalidade por campo não documentada"],
+      riscos:["Coleta sem base clara"],
+      areas:["Privacidade","Engenharia"],
+      prox:"Mapear finalidade por campo e propor hipótese de automação detectiva."},
+    {id:"evidencia-incompleta", t:"Controle com evidência incompleta", tags:["evidência","retenção"],
+      processo:"Controle sintético de retenção com logs parciais.",
+      objetivo:"Avaliar se a evidência atual sustenta a regra declarada.",
+      dados:["log_retencao_sintetico","evento_controle"],
+      sistemas:["Sandbox-Archive-C"],
+      lacunas:["Log sintético parcial","Política não versionada"],
+      riscos:["Controle não verificável end-to-end"],
+      areas:["Engenharia","Segurança","Privacidade"],
+      prox:"Completar evidência sintética e validar regra antes de recomendar."}
+  ];
+
+  var BIBLIOTECA = [
+    {t:"Template de backlog", icon:"list", desc:"Estrutura para registrar lacunas e riscos com prioridade, área e próximo passo.", uso:"Use após a etapa 4 da jornada."},
+    {t:"Matriz de evidências", icon:"table", desc:"Tabela que relaciona controle, evidência disponível e estado (presente, parcial, ausente).", uso:"Suporte para o radar de decisão."},
+    {t:"Questionário processo–dados–sistemas", icon:"help", desc:"Roteiro de perguntas para estruturar o mapeamento inicial de um cenário sintético.", uso:"Use na etapa 2 da jornada."},
+    {t:"Fluxos BPMN sintéticos", icon:"flow", desc:"Diagramas de processo fictícios para praticar leitura e identificação de lacunas.", uso:"Base para mapear dependências."},
+    {t:"Regras de triagem", icon:"filter", desc:"Conjunto de regras verificáveis para classificar sistemas sintéticos candidatos à revisão.", uso:"Use na etapa 1 da jornada."},
+    {t:"ADRs", icon:"doc", desc:"Decisões arquiteturais sintéticas registradas para rastreabilidade do sandbox.", uso:"Consulta quando uma hipótese técnica é proposta."},
+    {t:"Limites de uso", icon:"shield", desc:"Documento que define o que o sandbox pode e não pode fazer.", uso:"Leia antes de propor automação."},
+    {t:"Checklist de reunião", icon:"check", desc:"Roteiro para conduzir uma reunião de alinhamento entre Engenharia e Advocacia/Privacidade.", uso:"Use ao encerrar uma etapa da jornada."}
+  ];
+
+  var CHECKLIST = [
+    "A regra candidata tem finalidade sintética escrita?",
+    "Existe evidência que sustente a regra?",
+    "O limite da automação está explicitado?",
+    "A regra não decide validade jurídica nem aprova risco?",
+    "Há um humano responsável pela validação?",
+    "O próximo passo seguro está registrado?"
+  ];
+
+  /* ============ Helpers ============ */
+  function el(tag, attrs, children){
+    var e = document.createElement(tag);
+    if(attrs){
+      Object.keys(attrs).forEach(function(k){
+        if(k==="class") e.className = attrs[k];
+        else if(k==="html") e.innerHTML = attrs[k];
+        else if(k==="text") e.textContent = attrs[k];
+        else if(k.indexOf("aria-")===0 || k==="role" || k==="tabindex" || k==="id" || k==="hidden") e.setAttribute(k, attrs[k]);
+        else if(k.indexOf("data-")===0) e.setAttribute(k, attrs[k]);
+        else e[k] = attrs[k];
+      });
+    }
+    if(children){
+      (Array.isArray(children)?children:[children]).forEach(function(c){
+        if(c==null) return;
+        if(typeof c === "string") e.appendChild(document.createTextNode(c));
+        else e.appendChild(c);
+      });
+    }
+    return e;
+  }
+
+  function svgIcon(name){
+    var icons = {
+      list:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5 H16 M4 10 H16 M4 15 H11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      table:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 9 H17 M3 13 H17 M8 4 V16 M12 4 V16" stroke="currentColor" stroke-width="1.2"/></svg>',
+      help:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 8 a2.5 2.5 0 1 1 3.5 2.3 c-.8.4-1 .8-1 1.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="10" cy="14.8" r="1" fill="currentColor"/></svg>',
+      flow:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="3" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="12" y="3" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="7" y="13" width="6" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 7 V11 H10 V13 M15 7 V11 H10" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>',
+      filter:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4 H17 L12 10 V16 L8 14 V10 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+      doc:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3 H12 L16 7 V17 H5 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 3 V7 H16 M7 11 H13 M7 14 H11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+      shield:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2 L17 5 V11 C17 14.5 14 17.5 10 18.5 C6 17.5 3 14.5 3 11 V5 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+      check:'<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 10 L9 13 L14 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
+    return icons[name] || icons.doc;
+  }
+
+  /* ============ Render: Possibilidades ============ */
+  function renderPoss(){
+    var grid = document.getElementById("poss-grid");
+    POSSIBILIDADES.forEach(function(p, i){
+      var details = el("details", {class:"card poss-card"});
+      var summary = el("summary", {class:"poss-summary"});
+      var title = el("div", {class:"poss-title"}, [
+        el("h3", {text:p.t}),
+        el("span", {class:"chev", html:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6 L8 11 L13 6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'})
+      ]);
+      summary.appendChild(title);
+      details.appendChild(summary);
+      var body = el("div", {class:"poss-body"});
+      var dl = el("dl");
+      [["Objetivo",p.obj],["Entrada necessária",p.ent],["Saída esperada",p.sai],["Áreas envolvidas",p.areas],["Limites de atuação",p.lim]].forEach(function(pair){
+        dl.appendChild(el("dt", {text:pair[0]}));
+        dl.appendChild(el("dd", {text:pair[1]}));
+      });
+      body.appendChild(dl);
+      details.appendChild(body);
+      grid.appendChild(details);
+    });
+  }
+
+  /* ============ Render: Jornada ============ */
+  function renderJornada(){
+    var ol = document.getElementById("timeline");
+    JORNADA.forEach(function(j, i){
+      var li = el("li", {class:"step"});
+      var details = el("details");
+      var summary = el("summary", {html:'<span class="num">'+(i+1)+'</span><span class="stitle">'+j.t+'</span><span class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 6 L8 11 L13 6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'});
+      details.appendChild(summary);
+      var body = el("div", {class:"step-body"});
+      [["Por que importa", j.why],["O que Engenharia faz", j.eng],["O que Advocacia/Privacidade faz", j.adv],["Evidência a buscar", j.ev],["Quem consultar", j.who]].forEach(function(pair){
+        body.appendChild(el("h4", {text:pair[0]}));
+        body.appendChild(el("p", {text:pair[1]}));
+      });
+      body.appendChild(el("div", {class:"ready", html:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8 L7 12 L13 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Sinal de pronto: '+j.ready}));
+      details.appendChild(body);
+      li.appendChild(details);
+      ol.appendChild(li);
+    });
+  }
+
+  /* ============ Render: Cenários ============ */
+  var activeScenario = null;
+  var activeFilter = "all";
+
+  function renderFilters(){
+    var allTags = ["legado","retenção","acesso","integracao","fornecedor","automação","BPMN","evidência"];
+    var wrap = document.getElementById("cen-filters");
+    var all = el("button", {class:"filter-chip", type:"button", text:"Todos", "aria-pressed":"true"});
+    all.setAttribute("data-tag","all");
+    wrap.appendChild(all);
+    allTags.forEach(function(t){
+      var b = el("button", {class:"filter-chip", type:"button", text:t, "aria-pressed":"false"});
+      b.setAttribute("data-tag", t);
+      wrap.appendChild(b);
+    });
+    wrap.addEventListener("click", function(e){
+      var btn = e.target.closest(".filter-chip");
+      if(!btn) return;
+      activeFilter = btn.getAttribute("data-tag");
+      Array.prototype.forEach.call(wrap.querySelectorAll(".filter-chip"), function(c){
+        c.setAttribute("aria-pressed", c===btn ? "true" : "false");
+      });
+      renderScenarios();
+    });
+  }
+
+  function renderScenarios(){
+    var grid = document.getElementById("cen-grid");
+    grid.innerHTML = "";
+    var filtered = CENARIOS.filter(function(c){
+      if(activeFilter==="all") return true;
+      return c.tags.indexOf(activeFilter) !== -1;
+    });
+    if(filtered.length === 0){
+      grid.appendChild(el("div", {class:"empty-state", html:'<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="display:block;margin:0 auto .5rem;"><circle cx="20" cy="20" r="16" fill="none" stroke="#D7E2EC" stroke-width="2"/><path d="M14 20 H26 M14 24 H22" stroke="#49657D" stroke-width="2" stroke-linecap="round"/></svg>Nenhum cenário sintético com essa tag. Tente outra combinação.'}));
+      announce("Nenhum cenário encontrado para a tag "+activeFilter+".");
+      return;
+    }
+    filtered.forEach(function(c){
+      var card = el("article", {class:"scenario-card", role:"button", tabindex:"0", "aria-pressed": (activeScenario===c.id)?"true":"false", "aria-controls":"cen-detail"});
+      card.setAttribute("data-id", c.id);
+      card.appendChild(el("h3", {text:c.t}));
+      card.appendChild(el("p", {class:"muted", text:c.processo.substring(0,90)+"…"}));
+      var tags = el("div", {class:"tags"});
+      c.tags.forEach(function(t){ tags.appendChild(el("span", {class:"tag", text:t})); });
+      card.appendChild(tags);
+      card.addEventListener("click", function(){ selectScenario(c.id); });
+      card.addEventListener("keydown", function(e){
+        if(e.key==="Enter" || e.key===" "){ e.preventDefault(); selectScenario(c.id); }
+      });
+      grid.appendChild(card);
+    });
+    announce(filtered.length+" cenário(s) sintético(s) listado(s).");
+  }
+
+  function selectScenario(id){
+    activeScenario = id;
+    Array.prototype.forEach.call(document.querySelectorAll(".scenario-card"), function(card){
+      card.setAttribute("aria-pressed", card.getAttribute("data-id")===id ? "true" : "false");
+    });
+    var c = CENARIOS.filter(function(x){return x.id===id;})[0];
+    var detail = document.getElementById("cen-detail");
+    detail.innerHTML = "";
+    var head = el("div", {class:"sd-head"});
+    head.appendChild(el("h3", {text:c.t}));
+    var closeBtn = el("button", {class:"btn btn-ghost", type:"button", text:"Fechar ficha"});
+    closeBtn.addEventListener("click", function(){
+      detail.hidden = true;
+      activeScenario = null;
+      Array.prototype.forEach.call(document.querySelectorAll(".scenario-card"), function(card){
+        card.setAttribute("aria-pressed","false");
+      });
+      announce("Ficha de cenário fechada.");
+    });
+    head.appendChild(closeBtn);
+    detail.appendChild(head);
+
+    var body = el("div", {class:"sd-body"});
+    var dl = el("dl");
+    function field(label, content){
+      var dd = el("dd");
+      if(Array.isArray(content)){
+        var ul = el("ul");
+        content.forEach(function(x){ ul.appendChild(el("li", {text:x})); });
+        dd.appendChild(ul);
+      } else {
+        dd.textContent = content;
+      }
+      var f = el("div", {class:"field"});
+      f.appendChild(el("dt", {text:label}));
+      f.appendChild(dd);
+      return f;
+    }
+    dl.appendChild(field("Processo", c.processo));
+    dl.appendChild(field("Objetivo", c.objetivo));
+    dl.appendChild(field("Dados fictícios envolvidos", c.dados));
+    dl.appendChild(field("Sistemas fictícios", c.sistemas));
+    dl.appendChild(field("Lacunas", c.lacunas));
+    dl.appendChild(field("Riscos a investigar", c.riscos));
+    dl.appendChild(field("Áreas a consultar", c.areas));
+    body.appendChild(dl);
+    body.appendChild(el("div", {class:"next-step", html:"<strong>Próximo passo seguro:</strong> "+c.prox}));
+    detail.appendChild(body);
+    detail.hidden = false;
+    detail.scrollIntoView({behavior:"smooth", block:"nearest"});
+    announce("Ficha do cenário \""+c.t+"\" aberta.");
+  }
+
+  /* ============ Tabs painel ============ */
+  function initTabs(){
+    var tablist = document.querySelector(".tabs");
+    var tabs = Array.prototype.slice.call(tablist.querySelectorAll(".tab-btn"));
+    function activate(tab){
+      tabs.forEach(function(t){
+        var sel = t===tab;
+        t.setAttribute("aria-selected", sel?"true":"false");
+        var panel = document.getElementById(t.getAttribute("aria-controls"));
+        if(panel){
+          panel.classList.toggle("active", sel);
+          panel.hidden = !sel;
+        }
+      });
+    }
+    tabs.forEach(function(tab, idx){
+      tab.addEventListener("click", function(){ activate(tab); });
+      tab.addEventListener("keydown", function(e){
+        var n = tabs.length;
+        var cur = tabs.indexOf(tab);
+        var nxt = -1;
+        if(e.key==="ArrowRight") nxt = (cur+1)%n;
+        else if(e.key==="ArrowLeft") nxt = (cur-1+n)%n;
+        else if(e.key==="Home") nxt = 0;
+        else if(e.key==="End") nxt = n-1;
+        if(nxt>=0){ e.preventDefault(); tabs[nxt].focus(); activate(tabs[nxt]); }
+      });
+    });
+  }
+
+  /* ============ Checklist ============ */
+  function renderChecklist(){
+    var wrap = document.getElementById("checklist-items");
+    CHECKLIST.forEach(function(item, i){
+      var id = "chk-"+i;
+      var div = el("div", {class:"check-item"});
+      var inp = el("input", {type:"checkbox", id:id});
+      var lbl = el("label", {text:item, "for":id});
+      // restore from localStorage (preferência local apenas)
+      try{
+        if(localStorage.getItem("pes_chk_"+i) === "1"){
+          inp.checked = true;
+          div.classList.add("done");
+        }
+      }catch(e){}
+      inp.addEventListener("change", function(){
+        div.classList.toggle("done", inp.checked);
+        try{ localStorage.setItem("pes_chk_"+i, inp.checked?"1":"0"); }catch(e){}
+        var done = wrap.querySelectorAll("input:checked").length;
+        announce("Progresso do checklist: "+done+" de "+CHECKLIST+" itens concluídos.");
+      });
+      div.appendChild(inp);
+      div.appendChild(lbl);
+      wrap.appendChild(div);
+    });
+  }
+
+  /* ============ Biblioteca ============ */
+  function renderBiblioteca(){
+    var grid = document.getElementById("lib-grid");
+    BIBLIOTECA.forEach(function(b){
+      var card = el("article", {class:"card lib-card"});
+      var icon = el("span", {class:"lib-icon", html:svgIcon(b.icon)});
+      card.appendChild(icon);
+      card.appendChild(el("h3", {text:b.t}));
+      card.appendChild(el("p", {text:b.desc}));
+      var d = el("details");
+      d.appendChild(el("summary", {text:"Quando usar"}));
+      d.appendChild(el("div", {class:"lib-detail", text:b.uso}));
+      card.appendChild(d);
+      grid.appendChild(card);
+    });
+  }
+
+  /* ============ Status / aria-live ============ */
+  var statusEl = document.getElementById("check-status");
+  var announceTimer = null;
+  function announce(msg){
+    if(!statusEl) return;
+    statusEl.textContent = msg;
+    statusEl.classList.add("flash");
+    clearTimeout(announceTimer);
+    announceTimer = setTimeout(function(){
+      statusEl.classList.remove("flash");
+    }, 2500);
+  }
+
+  /* ============ Reset filtros ============ */
+  function initReset(){
+    document.getElementById("cen-reset").addEventListener("click", function(){
+      activeFilter = "all";
+      var wrap = document.getElementById("cen-filters");
+      Array.prototype.forEach.call(wrap.querySelectorAll(".filter-chip"), function(c){
+        c.setAttribute("aria-pressed", c.getAttribute("data-tag")==="all" ? "true" : "false");
+      });
+      renderScenarios();
+      announce("Filtros limpos. Mostrando todos os cenários sintéticos.");
+    });
+  }
+
+  /* ============ Nav toggle mobile ============ */
+  function initNav(){
+    var btn = document.querySelector(".nav-toggle");
+    var nav = document.getElementById("navlinks");
+    if(!btn || !nav) return;
+    btn.addEventListener("click", function(){
+      var open = nav.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open?"true":"false");
+      btn.textContent = open ? "Fechar" : "Menu";
+    });
+    nav.addEventListener("click", function(e){
+      if(e.target.tagName==="A" && nav.classList.contains("open")){
+        nav.classList.remove("open");
+        btn.setAttribute("aria-expanded","false");
+        btn.textContent = "Menu";
+      }
+    });
+  }
+
+  /* ============ Init ============ */
+  document.addEventListener("DOMContentLoaded", function(){
+    renderPoss();
+    renderJornada();
+    renderFilters();
+    renderScenarios();
+    initTabs();
+    renderChecklist();
+    renderBiblioteca();
+    initReset();
+    initNav();
+  });
+})();
+</script>
+</body>
+</html>
