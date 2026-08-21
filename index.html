@@ -574,9 +574,10 @@
   }
   .footer-warn strong{color:var(--alert);}
   .footer-grid{
-    display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;
+    display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:1.5rem;align-items:start;
   }
-  @media (max-width:680px){.footer-grid{grid-template-columns:1fr;}}
+  @media (max-width:860px){.footer-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:560px){.footer-grid{grid-template-columns:1fr;}}
   .footer-links{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;}
   .footer-links a{color:var(--action);text-decoration:none;font-size:.9rem;min-height:44px;display:inline-flex;align-items:center;}
   .footer-links a:hover{text-decoration:underline;}
@@ -1105,7 +1106,7 @@
     </div>
 
     <div class="footer-grid">
-      <nav class="footer-links" aria-label="Links internos do rodapé">
+      <nav class="footer-links" aria-label="Navegação interna da página">
         <a href="#topo">Início</a>
         <a href="#colaboracao">Colaboração</a>
         <a href="#jornada">Jornada</a>
@@ -1115,11 +1116,19 @@
         <a href="#automacao">Automação</a>
         <a href="#biblioteca">Biblioteca</a>
       </nav>
+      <nav class="footer-links" aria-label="Documentação do repositório">
+        <a href="./README.md">Repositório e contexto</a>
+        <a href="./SECURITY.md">Segurança</a>
+        <a href="./docs/governance/limites-de-uso.md">Limites de uso</a>
+        <a href="./docs/adr/ADR-001-dados-sinteticos-por-padrao.md">Dados sintéticos</a>
+        <a href="./docs/templates/cartao-backlog-privacidade.md">Template de backlog</a>
+        <a href="./docs/design/brief-index-html.md">Briefing de design</a>
+      </nav>
       <div class="footer-meta">
-        <p style="margin:0 0 .35rem;"><strong>Dados sintéticos:</strong> todos os nomes de sistemas, processos, campos e pessoas neste arquivo são fictícios.</p>
-        <p style="margin:0 0 .35rem;"><strong>Segurança:</strong> não inclua credenciais, tokens, URLs privadas nem variáveis de ambiente reais.</p>
-        <p style="margin:0 0 .35rem;"><strong>Limites de uso:</strong> use apenas para aprendizado, demonstração e prática orientada a processo.</p>
-        <p style="margin:0;"><strong>Como contribuir:</strong> proponha cenários sintéticos, abra issues com perguntas verificáveis e registre lacunas como hipóteses.</p>
+        <p style="margin:0 0 .35rem;"><strong>Dados sintéticos:</strong> todos os nomes de sistemas, processos, campos e pessoas neste arquivo são fictícios. Consulte a <a href="./docs/adr/ADR-001-dados-sinteticos-por-padrao.md">ADR-001</a> para o padrão adotado.</p>
+        <p style="margin:0 0 .35rem;"><strong>Segurança:</strong> não inclua credenciais, tokens, URLs privadas nem variáveis de ambiente reais. Consulte <a href="./SECURITY.md">SECURITY.md</a>.</p>
+        <p style="margin:0 0 .35rem;"><strong>Limites de uso:</strong> use apenas para aprendizado, demonstração e prática orientada a processo. Consulte os <a href="./docs/governance/limites-de-uso.md">limites formais</a>.</p>
+        <p style="margin:0;"><strong>Como contribuir:</strong> proponha cenários sintéticos, abra issues com perguntas verificáveis e registre lacunas como hipóteses. Consulte o <a href="./README.md">README</a> e o <a href="./docs/design/brief-index-html.md">briefing de design</a>.</p>
       </div>
     </div>
   </div>
