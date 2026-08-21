@@ -1,0 +1,47 @@
+{
+  "scenario_id": "SCN-PORTARIA-001",
+  "synthetic": true,
+  "purpose": "Testar triagem de lacuna de retenção em processo fictício de controle de entrada.",
+  "process": {
+    "id": "PROC-ENTRY-001",
+    "name": "Controle fictício de entrada de visitantes",
+    "status": "active",
+    "owner_role": "Responsável fictício de operações prediais"
+  },
+  "systems": [
+    {
+      "id": "SYS-ENTRY-001",
+      "name": "Sistema fictício de controle de entrada",
+      "type": "web_application",
+      "environment": "sandbox"
+    }
+  ],
+  "treatment_activity": {
+    "id": "ROPA-SYN-001",
+    "purpose": "Registrar entrada e saída de visitantes em ambiente fictício.",
+    "data_categories": ["identificação", "data_hora_entrada", "data_hora_saida"],
+    "retention_period": null,
+    "retention_evidence": null,
+    "integrations": [],
+    "backups_known": false,
+    "audit_log_available": true
+  },
+  "expected_findings": [
+    {
+      "rule": "retention_review_required",
+      "severity": "high",
+      "expected_result": "Gerar pendência de validação de retenção; não recomendar exclusão automática."
+    },
+    {
+      "rule": "backup_dependency_unknown",
+      "severity": "medium",
+      "expected_result": "Solicitar mapeamento de backup e recuperação antes de qualquer proposta de descarte."
+    }
+  ],
+  "human_validation_required": [
+    "dono do processo",
+    "privacidade ou DPO",
+    "jurídico ou compliance quando aplicável",
+    "segurança e tecnologia para impactos técnicos"
+  ]
+}

@@ -1,0 +1,40 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Data that must never be versioned
+*.sql
+*.dump
+*.bak
+*.backup
+*.sqlite
+*.db
+exports/
+backups/
+logs/
+*.log
+screenshots/
+attachments/
+
+# Local tooling
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+node_modules/
+dist/
+build/
+coverage/
+.DS_Store
+.idea/
+.vscode/
+
+# Generated reports
+reports/generated/
